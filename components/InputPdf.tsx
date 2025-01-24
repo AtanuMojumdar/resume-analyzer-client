@@ -9,6 +9,7 @@ import JobListings from "./JobListings"
 import { JobLists } from '@/lib/types';
 import LoadingJobs from "./LoadingJobs"
 import { Settings } from "./CustomTuning"
+import { useToast } from "@/hooks/use-toast"
 
 type resumeDetails = {
     job: string,
@@ -16,13 +17,13 @@ type resumeDetails = {
 }
 
 export function InputFile() {
-    const [message, setMessage] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setisLoading] = useState<boolean>(false);
     const [suggestionIsLoading, setSuggestionIsLoading] = useState(false);
     const [jobs, setJobs] = useState<JobLists>([]);
     const [nextPage, setNextPage] = useState("");
     const [resume, setResume] = useState<resumeDetails>({})
+    const { toast } = useToast()
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (e.target.files && e.target.files.length > 0) {
@@ -34,9 +35,24 @@ export function InputFile() {
         e.preventDefault();
         setisLoading(true);
         if (!file) {
-            setMessage('Please provide all required fields.');
+            setisLoading(false);
+            toast({
+                variant: "destructive",
+                title: "Pdf missing!",
+                description: "Please provide your resume in pdf"
+            })
             return;
         }
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1);
+        if (fileExtension !== "pdf") {
+            toast({
+                variant: "destructive",
+                title: "Pdf missing!",
+                description: "Please provide your resume in pdf"
+            })
+            return;
+        }
+
         const formData = new FormData();
         formData.append("resume", file);
         console.log(file)
@@ -55,6 +71,11 @@ export function InputFile() {
             setNextPage(parsedJSON.nextPage);
         }
         catch (err) {
+            toast({
+                variant: "destructive",
+                title: "Error 500: Server Error",
+                description: "An error occurred while fetching job listings. Please try again."
+            });
             setisLoading(false);
             console.log(err)
         }
@@ -64,7 +85,7 @@ export function InputFile() {
     return (
         <div className="flex flex-col">
             <div className="absolute right-4 top-4">
-                <Settings setSuggestionIsLoading={setSuggestionIsLoading} jobTitle={resume.job} location={resume.city} setJobs={setJobs}/>
+                <Settings setSuggestionIsLoading={setSuggestionIsLoading} jobTitle={resume.job} location={resume.city} setJobs={setJobs} />
             </div>
 
             <div className="mx-auto w-[75%] flex justify-center">
@@ -79,11 +100,20 @@ export function InputFile() {
                 </form>
             </div>
             <div className="mx-4 mt-20">
-            <h1 className='text-2xl text-center'>Matching Opportunities</h1>
-            {
-                isLoading || suggestionIsLoading ? <LoadingJobs/> : <JobListings jobs={jobs} />
-            }
-                
+                <h1 className='text-2xl text-center'>Matching Opportunities</h1>
+                { !isLoading ?
+                    <span>
+                        {
+                            isLoading || suggestionIsLoading ? <div> <div><LoadingJobs /></div> <div className="hidden"><JobListings jobs={jobs} /></div></div> : <div> <div className="hidden"><LoadingJobs /></div> <div><JobListings jobs={jobs} /></div></div>
+                        }
+                    </span> : <span>
+                        {
+                            isLoading || suggestionIsLoading ? <LoadingJobs/> : <JobListings jobs={jobs}/>
+                        }
+                    </span>
+                }
+
+
             </div>
         </div>
     )

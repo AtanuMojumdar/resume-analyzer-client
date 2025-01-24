@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { DrawerDemo } from './Suggestion';
 import axios from 'axios';
 import { Loader2 } from "lucide-react"
+import { useToast } from '@/hooks/use-toast';
 
 type JobListProps = {
   jobs: JobLists;
@@ -19,6 +20,8 @@ const JobListings: React.FC<JobListProps> = ({ jobs }) => {
   const [isLoading, setisLoading] = useState(false);
   const [score, setscore] = useState(0);
   const [audioPath, setaudioPath] = useState(null);
+  const { toast } = useToast()
+
   async function handleClick() {
     try {
       console.log(first.current);
@@ -40,12 +43,17 @@ const JobListings: React.FC<JobListProps> = ({ jobs }) => {
       }
     }
     catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error 500",
+        description: "Unable to provide feedback. Please upload you resume/pdf again."
+      })
       setisLoading(false);
       console.log(err)
     }
   }
   return (
-    <div className='flex gap-4 flex-col relative'>
+    <div className= "flex gap-4 flex-col relative">
 
       {
         jobs.length > 0 ?

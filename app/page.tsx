@@ -4,8 +4,8 @@ import Home from '@/components/Home'
 
 const Page = () => {
   return (
-    <>
-    <div className=' p-2'>
+    <div>
+    <div className='p-2'>
       <h1 className=' font-semibold text-3xl font-sans mt-2'>FindYourWork</h1>
     {/* <ModeToggle/> */}
       
@@ -15,7 +15,7 @@ const Page = () => {
     </div>
     {/* <div className='absolute top-2 right-2'>
     </div> */}
-    </>
+    </div>
   )
 }
 

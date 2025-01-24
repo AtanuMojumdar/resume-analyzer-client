@@ -15,23 +15,35 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer"
-import AudioVisualizer from "./AudioVisualizer"
+import { useToast } from "@/hooks/use-toast"
+  
 
 
 
 export function DrawerDemo({ ref, suggestion, score, audioPath }) {
     const [isPlaying, setIsPlaying] = React.useState(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
+    const { toast } = useToast()
 
 
     const playAudio = (path: string) => {
         console.log("play fn")
-        if (!audioRef.current) {
-            audioRef.current = new Audio(`http://localhost:8000/${path}`);
-            audioRef.current.onended = () => setIsPlaying(false); // Reset state when audio ends
+        try{
+            if (!audioRef.current) {
+                audioRef.current = new Audio(`http://localhost:8000/${path}`);
+                audioRef.current.onended = () => setIsPlaying(false); // Reset state when audio ends
+            }
+            audioRef.current.play();
+            setIsPlaying(true);
         }
-        audioRef.current.play();
-        setIsPlaying(true);
+        catch(err){
+            toast({
+                variant: "destructive",
+                title: "Error 400",
+                description: "Unable to play the audio file."
+            })
+            console.log(err);
+        }
     };
 
     const stopAudio = () => {

@@ -23,25 +23,39 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import axios from "axios"
 import { JobLists } from "@/lib/types"
+import { useToast } from "@/hooks/use-toast"
 
 
 
 export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }: { jobTitle: string, location: string, setJobs: Dispatch<SetStateAction<JobLists>>, setSuggestionIsLoading: Dispatch<SetStateAction<boolean>> }) {
-    const [job, setJob] = useState(jobTitle)
-    const [place, setPlace] = useState(location);
+    const [job, setJob] = useState(jobTitle || "")
+    const [place, setPlace] = useState(location || "");
     const [remoteOnly, setRemoteOnly] = useState("option-two")
     const [internOnly, setInternOnly] = useState("option-two")
+    const [saved, setSaved] = useState<boolean>(false)
+    const { toast } = useToast()
 
     useEffect(() => {
         setJob(jobTitle);
-        setPlace(location)
+        setPlace(location);
+        setInternOnly("option-two");
+        setRemoteOnly("option-two");
     }, [jobTitle, location])
 
 
 
     async function handleSubmit() {
         try {
+            if(!job || !place){
+                toast({
+                    variant: "destructive",
+                    title: "Error 400",
+                    description: "Please provide correct parameters"
+                })
+                return;
+            }
             setSuggestionIsLoading(true);
+            setSaved(true);
             const data = await axios.post("http://localhost:8000/custom-parameters", {
                 jobTitle: job,
                 location: place,
@@ -54,18 +68,31 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
             setJobs(parsedJSON.jobs)
 
         } catch (err) {
+            toast({
+                variant: "destructive",
+                title: "Error 400",
+                description: "An error occurred while fetching job listings. Please check provided parameters and try again."
+            })
             setSuggestionIsLoading(false);
             console.log(err)
 
         }
 
     }
+    function handleOpen(){
+        if(!saved){
+            setJob(jobTitle);
+            setPlace(location);
+            setRemoteOnly("option-two");
+            setInternOnly("option-two")
+        }
+    }
 
 
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline"><Settings2 /></Button>
+                <Button onClick={handleOpen} variant="outline"><Settings2 /></Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -80,9 +107,10 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
                             JobTitle
                         </Label>
                         <Input
+                        required
                             id="job"
                             placeholder="Job Title"
-                            value={job}
+                            value={job || ""}
                             onChange={(e) => setJob(e.target.value)}
                             className="col-span-3"
                         />
@@ -92,9 +120,10 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
                             Location
                         </Label>
                         <Input
+                        required
                             id="location"
                             placeholder="City"
-                            value={place}
+                            value={place || ""}
                             onChange={(e) => setPlace(e.target.value)}
                             className="col-span-3"
                         />
