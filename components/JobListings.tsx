@@ -86,7 +86,7 @@ const JobListings: React.FC<JobListProps> = ({ jobs }) => {
                         </span>
                         <span className='flex gap-2'>
                           <MapPin size={18} />
-                          <p>{job.location}</p>
+                          <p>{job.location || "unavailable"}</p>
                         </span>
                         <span className='flex gap-2'>
                           <Hourglass size={18} />
