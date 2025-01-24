@@ -34,13 +34,16 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
     const [internOnly, setInternOnly] = useState("option-two")
     const [saved, setSaved] = useState<boolean>(false)
     const { toast } = useToast()
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         setJob(jobTitle);
         setPlace(location);
         setInternOnly("option-two");
         setRemoteOnly("option-two");
+        setSaved(false);
     }, [jobTitle, location])
+    
 
 
 
@@ -90,7 +93,7 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
 
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button onClick={handleOpen} variant="outline"><Settings2 /></Button>
             </DialogTrigger>
@@ -184,7 +187,7 @@ export function Settings({ jobTitle, location, setJobs, setSuggestionIsLoading }
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                    <Button onClick={handleSubmit} type="submit">Save changes</Button>
+                    <Button onClick={handleSubmit} type="submit">Search</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>
